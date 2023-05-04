@@ -21,32 +21,45 @@ const typeDefs = gql`
 const resolvers = {
   Query: {
     slide: async (_, { slideId }, { db }) => {
-      const collection = db.collection('slides');
+      try {
+        const collection = db.collection('slides');
 
-      const slide = await collection.findOne({ _id: new ObjectId(slideId) });
+        const slide = await collection.findOne({ _id: new ObjectId(slideId) });
 
-      return slide;
+        if (slide) {
+          return slide;
+        } else {
+          throw new Error('Slide not found');
+        }
+      } catch (error) {
+        console.error('Error reading slide:', error);
+        throw new Error('Internal server error');
+      }
     },
   },
 };
 
 const startServer = async () => {
-  const client = new MongoClient('mongodb://localhost:27017');
-  await client.connect();
-  const db = client.db('students_api'); // Replace with your database name
+  try {
+    const client = new MongoClient('mongodb://localhost:27017');
+    await client.connect();
+    const db = client.db('students_api'); // Replace with your database name
 
-  const server = new ApolloServer({
-    typeDefs,
-    resolvers,
-    context: { db },
-  });
+    const server = new ApolloServer({
+      typeDefs,
+      resolvers,
+      context: { db },
+    });
 
-  await server.start();
-  server.applyMiddleware({ app });
+    await server.start();
+    server.applyMiddleware({ app });
 
-  app.listen({ port }, () => {
-    console.log(`Server listening on port ${port}`);
-  });
+    app.listen({ port }, () => {
+      console.log(`Server listening on port ${port}`);
+    });
+  } catch (error) {
+    console.error('Error starting server:', error);
+  }
 };
 
 startServer();
