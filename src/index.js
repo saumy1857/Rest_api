@@ -38,6 +38,36 @@ const resolvers = {
     },
   },
 };
+/*
+const resolvers = {
+  Query: {
+    slide: async (_, { slideId }, { db, token }) => {
+      try {
+        // Verify and decode the token as per your authentication mechanism
+
+        if (validToken) {
+          // Authorized user, continue with the query
+
+          const collection = db.collection('slides');
+          const slide = await collection.findOne({ _id: new ObjectId(slideId) });
+
+          if (slide) {
+            return slide;
+          } else {
+            throw new Error('Slide not found');
+          }
+        } else {
+          throw new Error('Unauthorized');
+        }
+      } catch (error) {
+        console.error('Error reading slide:', error);
+        throw new Error('Internal server error');
+      }
+    },
+  },
+};
+
+*/
 
 const startServer = async () => {
   try {
@@ -50,7 +80,21 @@ const startServer = async () => {
       resolvers,
       context: { db },
     });
+    /*
+    const server = new ApolloServer({
+     typeDefs,
+     resolvers,
+     context: ({ req }) => {
+    const token = req.headers.authorization || '';
 
+    const client = new MongoClient('mongodb://localhost:27017');
+    await client.connect();
+    const db = client.db('mydatabase');
+
+    return { db, token };
+  },
+});
+*/
     await server.start();
     server.applyMiddleware({ app });
 
