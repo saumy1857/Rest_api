@@ -41,9 +41,9 @@ const resolvers = {
 
 const startServer = async () => {
   try {
-    const client = new MongoClient('mongodb://localhost:27017');
+    const client = new MongoClient('mongodb+srv://LMDmax-dev:admin@cluster0.6m6yw.mongodb.net');
     await client.connect();
-    const db = client.db('students_api'); // Replace with your database name
+    const db = client.db('new-viewer');
 
     const server = new ApolloServer({
       typeDefs,
