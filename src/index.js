@@ -1,37 +1,52 @@
-const express= require("express");
-const app= express();
-require("./db/conn");
-const Student=require("./model/Student");
-app.use(express.json());
+const express = require('express');
+const { ApolloServer, gql } = require('apollo-server-express');
+const { MongoClient, ObjectId } = require('mongodb');
 
-app.post("/user",(req,res)=>{
-    const user=new Student(req.body);
-    user.save().then(()=>{
-        res.status(201);
-        res.send(user);
-    }).catch((e)=>{
-        res.status(400);
-        res.send(e); 
-    })
-});
-app.get("/user/:id",async(req,res) => {
-    try{
-        const _id =req.params.id;
-        const studentData= await Student.findById(_id);
-        res.send(studentData);
-    }catch(e){
-        res.send(e);
-    }
-})
-app.get("/user",async(req,res) => {
-    try{
-        const studentsData= await Student.find();
-        res.send(studentsData);
-    }catch(e){
-        res.send(e);
-    }
-})
+const app = express();
+const port = 3000;
 
-app.listen(9000,()=>{
- console.log("welcome");
-}); 
+const typeDefs = gql`
+  type Slide {
+    _id: ID!
+    slideName: String!
+    awsImageBucketUrl: String!
+    originalFileUrl: String!
+  }
+
+  type Query {
+    slide(slideId: ID!): Slide
+  }
+`;
+
+const resolvers = {
+  Query: {
+    slide: async (_, { slideId }, { db }) => {
+      const collection = db.collection('slides');
+
+      const slide = await collection.findOne({ _id: new ObjectId(slideId) });
+
+      return slide;
+    },
+  },
+};
+
+const startServer = async () => {
+  const client = new MongoClient('mongodb://localhost:27017');
+  await client.connect();
+  const db = client.db('students_api'); // Replace with your database name
+
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    context: { db },
+  });
+
+  await server.start();
+  server.applyMiddleware({ app });
+
+  app.listen({ port }, () => {
+    console.log(`Server listening on port ${port}`);
+  });
+};
+
+startServer();
