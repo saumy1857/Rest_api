@@ -6,8 +6,8 @@ const fs = require('fs');
 const sharp = require('sharp');
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3({
-  accessKeyId: 'AKIAZN6QGFQY2OWXGF55',
-  secretAccessKey: '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',
+  accessKeyId: '',
+  secretAccessKey: '',
   region: 'eu-north-1'
 });
 
